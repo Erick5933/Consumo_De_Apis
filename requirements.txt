@@ -2,4 +2,4 @@ streamlit
 pandas
 requests
 sqlite3  
-plotly
+
