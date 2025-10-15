@@ -201,6 +201,39 @@ def create_bar_chart(df):
     )
     return fig
 
+
+# Gráfica de barras agrupadas: usuarios por dominio y letra inicial
+def create_heatmap(df):
+    # Crear columna con la inicial del nombre
+    df['initial'] = df['name'].astype(str).str[0].str.upper()
+
+    # Agrupar datos
+    grouped = df.groupby(['email_domain', 'initial']).size().reset_index(name='count')
+
+    fig = px.bar(
+        grouped,
+        x='email_domain',
+        y='count',
+        color='initial',
+        barmode='group',
+        title='📊 Usuarios por Dominio y Letra Inicial del Nombre',
+        color_discrete_sequence=px.colors.qualitative.Bold
+    )
+
+    fig.update_layout(
+        xaxis_title='Dominio de correo',
+        yaxis_title='Cantidad de usuarios',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(size=14),
+        title_font_size=20,
+        height=500,
+        legend_title_text='Inicial del Nombre'
+    )
+
+    return fig
+
+
 # Función para crear gráfica de dona
 def create_donut_chart(df):
     dom_counts = df['email_domain'].value_counts().reset_index()
@@ -222,6 +255,33 @@ def create_donut_chart(df):
         height=500
     )
     return fig
+
+# Gráfica 1: Dispersión entre longitud del nombre e ID
+def create_scatter_plot(df):
+    fig = px.scatter(
+        df,
+        x='id',
+        y='name_length',
+        color='email_domain',
+        size='name_length',
+        hover_data=['name', 'email'],
+        title='🔍 Relación entre ID y longitud del nombre',
+        color_discrete_sequence=px.colors.qualitative.Plotly
+    )
+    fig.update_layout(
+        xaxis_title='ID de Usuario',
+        yaxis_title='Longitud del Nombre',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(size=14),
+        title_font_size=20,
+        height=500
+    )
+    return fig
+
+
+
+
 
 # Función para crear tabla interactiva
 def create_table(df):
@@ -280,6 +340,9 @@ def main():
         show_bar = st.checkbox("Gráfica de Barras", value=True)
         show_donut = st.checkbox("Gráfica de Dona", value=True)
         show_table = st.checkbox("Tabla de Datos", value=True)
+        show_scatter = st.checkbox("Gráfica de Dispersión", value=True)
+        show_heatmap = st.checkbox("Mapa de Calor", value=True)
+
         
         st.markdown("---")
         st.markdown("### 📄 Información")
@@ -339,6 +402,17 @@ def main():
         if show_table:
             st.plotly_chart(create_table(df), use_container_width=True)
         
+        if show_scatter or show_heatmap:
+            col1, col2 = st.columns(2)
+    
+            with col1:
+                if show_scatter:
+                    st.plotly_chart(create_scatter_plot(df), use_container_width=True)
+    
+        with col2:
+            if show_heatmap:
+                st.plotly_chart(create_heatmap(df), use_container_width=True)
+
         # Sección de exportación
         st.markdown("---")
         st.markdown("### Exportar Datos")
